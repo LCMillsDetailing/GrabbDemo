@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRABB — See How It Works</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    color: #FFF;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .intro-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+
+  .intro-screen.hidden { opacity: 0; visibility: hidden; }
+
+  .intro-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 900;
+    font-size: 72px;
+    letter-spacing: -3px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+
+  .intro-logo .accent { color: #8B0000; }
+
+  .intro-tagline {
+    font-size: 16px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-top: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1s forwards;
+  }
+
+  .intro-play {
+    margin-top: 48px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #8B0000;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.5s forwards;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .intro-play:hover { transform: scale(1.1); background: #A00000; }
+
+  .intro-play svg { width: 24px; height: 24px; fill: #FFF; margin-left: 3px; }
+
+  .intro-play-text {
+    font-size: 12px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.8s forwards;
+  }
+
+  /* Main container */
+  .demo-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 160px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .demo-container.visible { opacity: 1; }
+
+  .demo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #111;
+    margin-bottom: 40px;
+  }
+
+  .demo-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+
+  .demo-logo .accent { color: #8B0000; }
+
+  .demo-badge {
+    font-size: 11px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: 1px solid #222;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  /* Scene */
+  .scene-header { text-align: center; margin-bottom: 48px; }
+
+  .scene-step {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    color: #8B0000;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .scene-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.2;
+  }
+
+  .scene-desc {
+    color: #444;
+    font-size: 15px;
+    margin-top: 12px;
+    line-height: 1.6;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Phone */
+  .phone-container { display: flex; justify-content: center; margin: 40px 0; }
+
+  .phone {
+    width: 320px;
+    background: #0A0A0A;
+    border: 1px solid #1A1A1A;
+    border-radius: 36px;
+    padding: 20px 16px;
+    position: relative;
+  }
+
+  .phone-notch {
+    width: 90px;
+    height: 18px;
+    background: #000;
+    border-radius: 0 0 12px 12px;
+    margin: -20px auto 16px;
+  }
+
+  .phone-status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 8px 12px;
+    font-size: 10px;
+    color: #555;
+  }
+
+  .phone-contact {
+    text-align: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #151515;
+    margin-bottom: 16px;
+  }
+
+  .phone-contact-name { font-weight: 600; font-size: 15px; }
+
+  .phone-contact-sub {
+    font-size: 10px;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 3px;
+  }
+
+  .call-screen { text-align: center; padding: 40px 0; }
+
+  .call-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #151515;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #444;
+  }
+
+  .call-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .call-status { font-size: 13px; color: #555; }
+  .call-status.ringing { color: #8B0000; animation: pulse 1.5s ease infinite; }
+  .call-status.missed { color: #8B0000; }
+
+  .call-actions {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-top: 32px;
+  }
+
+  .call-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .call-btn.decline { background: #8B0000; color: #FFF; }
+  .call-btn.accept { background: #1a5c1a; color: #FFF; }
+
+  /* SMS */
+  .sms-area { min-height: 300px; padding: 8px 0; }
+
+  .sms-time {
+    font-size: 10px;
+    color: #333;
+    text-align: center;
+    margin: 12px 0;
+  }
+
+  .sms-bubble {
+    max-width: 80%;
+    padding: 11px 15px;
+    border-radius: 18px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .sms-bubble.visible { opacity: 1; transform: translateY(0); }
+
+  .sms-outgoing {
+    background: #FFFFFF;
+    color: #000;
+    border-bottom-right-radius: 4px;
+    margin-left: auto;
+    font-weight: 500;
+  }
+
+  .sms-incoming {
+    background: #151515;
+    color: #CCC;
+    border-bottom-left-radius: 4px;
+    margin-right: auto;
+  }
+
+  .sms-typing {
+    background: #151515;
+    color: #555;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    padding: 11px 15px;
+    font-size: 13px;
+    max-width: 60px;
+    margin-right: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .sms-typing.visible { opacity: 1; }
+  .sms-typing span { animation: typingDot 1.4s ease infinite; }
+  .sms-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .sms-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  .grabb-badge {
+    font-size: 9px;
+    color: #8B0000;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  /* Alert bars */
+  .alert-bar {
+    background: #0A0A0A;
+    border: 1px solid #1A1A1A;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .alert-bar.visible { opacity: 1; transform: translateY(0); }
+
+  .alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #8B0000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .alert-text { flex: 1; }
+  .alert-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .alert-desc { font-size: 11px; color: #555; }
+
+  /* Stats */
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin: 32px 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .stats-row.visible { opacity: 1; }
+  .stat-item { text-align: center; }
+
+  .stat-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #8B0000;
+    letter-spacing: -1px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 4px;
+  }
+
+  /* Navigation controls */
+  .nav-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000;
+    border-top: 1px solid #111;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .nav-controls.visible { opacity: 1; }
+
+  .nav-btn {
+    background: transparent;
+    color: #555;
+    border: 1px solid #222;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    font-weight: 500;
+  }
+
+  .nav-btn:hover { color: #FFF; border-color: #444; }
+
+  .nav-btn.primary {
+    background: #8B0000;
+    color: #FFF;
+    border: none;
+    padding: 10px 32px;
+  }
+
+  .nav-btn.primary:hover { background: #A00000; }
+
+  .nav-btn:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+  }
+
+  .nav-btn:disabled:hover { color: #555; border-color: #222; }
+
+  .nav-step-indicator {
+    font-size: 12px;
+    color: #333;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 1px;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .nav-prompt {
+    font-size: 11px;
+    color: #444;
+    text-align: center;
+    margin-top: 8px;
+    animation: subtlePulse 2s ease infinite;
+  }
+
+  .nav-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* CTA screen */
+  .cta-screen {
+    text-align: center;
+    padding: 80px 0 40px;
+    display: none;
+  }
+
+  .cta-screen.visible { display: block; }
+
+  .cta-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .cta-sub {
+    color: #444;
+    font-size: 16px;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+
+  .cta-btn {
+    background: #8B0000;
+    color: #FFF;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .cta-btn:hover { background: #A00000; }
+
+  .cta-contact {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #333;
+  }
+
+  .cta-contact a { color: #8B0000; text-decoration: none; }
+
+  .replay-btn {
+    background: transparent;
+    color: #333;
+    border: 1px solid #222;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 16px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .replay-btn:hover { color: #FFF; border-color: #444; }
+
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes typingDot { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+  @keyframes ringPulse {
+    0% { box-shadow: 0 0 0 0 rgba(139, 0, 0, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(139, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 0, 0, 0); }
+  }
+  @keyframes subtlePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .ringing-avatar { animation: ringPulse 1.5s ease infinite; }
+</style>
+</head>
+<body>
+
+  <!-- Intro -->
+  <div class="intro-screen" id="introScreen">
+    <div class="intro-logo">GRAB<span class="accent">B</span></div>
+    <div class="intro-tagline">Never lose a customer to a missed call</div>
+    <button class="intro-play" id="playBtn" onclick="startDemo()">
+      <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+    </button>
+    <div class="intro-play-text">Watch the demo</div>
+  </div>
+
+  <!-- Demo -->
+  <div class="demo-container" id="demoContainer">
+    <div class="demo-header">
+      <div class="demo-logo">GRAB<span class="accent">B</span></div>
+      <div class="demo-badge">Product Demo</div>
+    </div>
+    <div id="sceneArea"></div>
+    <div class="cta-screen" id="ctaScreen">
+      <div class="cta-title">Stop losing customers.<br>Start with Grab<span style="color:#8B0000;">b</span>.</div>
+      <div class="cta-sub">7-day free trial. No card required. Set up in 60 seconds.</div>
+      <button class="cta-btn" id="ctaBtn" onclick="handleCta()">Start Free Trial</button>
+      <div id="emailPicker" style="display:none; margin-top:24px; max-width:420px; margin-left:auto; margin-right:auto;">
+        <div style="font-size:13px; color:#555; margin-bottom:16px;">Choose your email provider:</div>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="https://mail.google.com/mail/?view=cm&to=hello@loganmills.uk&su=I%27m+interested+in+Grabb&body=Hi+Logan%2C%0A%0AI+just+watched+the+Grabb+demo+and+I%27m+interested+in+the+free+trial.%0A%0AMy+business%3A+%0AMy+name%3A+%0AMy+phone+number%3A+%0A%0AThanks" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#0A0A0A;border:1px solid #222;color:#FFF;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:600;font-size:14px;font-family:'Inter',sans-serif;transition:border-color 0.2s;">
+            Gmail
+          </a>
+          <a href="https://outlook.live.com/mail/0/deeplink/compose?to=hello@loganmills.uk&subject=I%27m+interested+in+Grabb&body=Hi+Logan%2C%0A%0AI+just+watched+the+Grabb+demo+and+I%27m+interested+in+the+free+trial.%0A%0AMy+business%3A+%0AMy+name%3A+%0AMy+phone+number%3A+%0A%0AThanks" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#0A0A0A;border:1px solid #222;color:#FFF;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:600;font-size:14px;font-family:'Inter',sans-serif;transition:border-color 0.2s;">
+            Outlook
+          </a>
+          <a href="mailto:hello@loganmills.uk?subject=I%27m%20interested%20in%20Grabb&body=Hi%20Logan%2C%0A%0AI%20just%20watched%20the%20Grabb%20demo%20and%20I%27m%20interested%20in%20the%20free%20trial.%0A%0AMy%20business%3A%20%0AMy%20name%3A%20%0AMy%20phone%20number%3A%20%0A%0AThanks" style="display:inline-flex;align-items:center;gap:8px;background:#0A0A0A;border:1px solid #222;color:#FFF;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:600;font-size:14px;font-family:'Inter',sans-serif;transition:border-color 0.2s;">
+            Other
+          </a>
+        </div>
+        <div style="font-size:11px; color:#333; margin-top:16px;">Or email us directly at <span style="color:#8B0000;">hello@loganmills.uk</span></div>
+      </div>
+      <div class="cta-contact">Questions? Email <a href="mailto:hello@loganmills.uk">hello@loganmills.uk</a></div>
+      <button class="replay-btn" onclick="location.reload()">Replay Demo</button>
+    </div>
+  </div>
+
+  <!-- Nav Controls -->
+  <div class="nav-controls" id="navControls">
+    <div class="nav-wrapper">
+      <div style="display:flex;align-items:center;gap:20px;">
+        <button class="nav-btn" id="prevBtn" onclick="prevScene()" disabled>&larr; Back</button>
+        <div class="nav-step-indicator" id="stepIndicator">1 / 5</div>
+        <button class="nav-btn primary" id="nextBtn" onclick="nextScene()">Next &rarr;</button>
+      </div>
+      <div class="nav-prompt" id="navPrompt">Click Next to continue</div>
+    </div>
+  </div>
+
+<script>
+function handleCta() {
+  document.getElementById('ctaBtn').style.display = 'none';
+  document.getElementById('emailPicker').style.display = 'block';
+}
+
+let currentScene = 0;
+const totalScenes = 6; // 0-4 are steps, 5 is CTA
+let animationTimeouts = [];
+
+function clearAnims() {
+  animationTimeouts.forEach(id => clearTimeout(id));
+  animationTimeouts = [];
+}
+
+function aWait(ms) {
+  return new Promise(r => {
+    const id = setTimeout(r, ms);
+    animationTimeouts.push(id);
+  });
+}
+
+function updateNav() {
+  const prev = document.getElementById('prevBtn');
+  const next = document.getElementById('nextBtn');
+  const indicator = document.getElementById('stepIndicator');
+  const prompt = document.getElementById('navPrompt');
+
+  prev.disabled = currentScene === 0;
+
+  if (currentScene >= 5) {
+    next.style.display = 'none';
+    indicator.textContent = '';
+    prompt.textContent = '';
+  } else {
+    next.style.display = '';
+    indicator.textContent = (currentScene + 1) + ' / 5';
+    prompt.textContent = 'Click Next to continue';
+  }
+}
+
+function startDemo() {
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('demoContainer').classList.add('visible');
+  document.getElementById('navControls').classList.add('visible');
+  currentScene = 0;
+  renderScene(0);
+}
+
+function nextScene() {
+  if (currentScene < 5) {
+    currentScene++;
+    clearAnims();
+    renderScene(currentScene);
+  }
+}
+
+function prevScene() {
+  if (currentScene > 0) {
+    currentScene--;
+    clearAnims();
+    renderScene(currentScene);
+  }
+}
+
+async function renderScene(idx) {
+  const area = document.getElementById('sceneArea');
+  const cta = document.getElementById('ctaScreen');
+  cta.classList.remove('visible');
+  updateNav();
+
+  if (idx === 0) {
+    // Scene 1: Incoming call
+    area.innerHTML = `
+      <div class="scene-header">
+        <div class="scene-step">Step 1</div>
+        <div class="scene-title">A customer calls your business.</div>
+        <div class="scene-desc">It's 2:34 PM. You're on another job. The phone rings.</div>
+      </div>
+      <div class="phone-container">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-status-bar"><span>14:34</span><span>4G</span></div>
+          <div class="call-screen">
+            <div class="call-avatar ringing-avatar">JD</div>
+            <div class="call-name">+44 7700 900123</div>
+            <div class="call-status ringing">Incoming Call...</div>
+            <div class="call-actions">
+              <div class="call-btn decline">&#x2715;</div>
+              <div class="call-btn accept">&#x2713;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  else if (idx === 1) {
+    // Scene 2: Call missed
+    area.innerHTML = `
+      <div class="scene-header">
+        <div class="scene-step">Step 2</div>
+        <div class="scene-title">You missed the call.</div>
+        <div class="scene-desc">You were busy. It happens. Without Grabb, this customer is already calling your competitor.</div>
+      </div>
+      <div class="phone-container">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-status-bar"><span>14:34</span><span>4G</span></div>
+          <div class="call-screen">
+            <div class="call-avatar">JD</div>
+            <div class="call-name">+44 7700 900123</div>
+            <div class="call-status missed">Missed Call</div>
+            <div class="call-actions">
+              <div class="call-btn decline">&#x2715;</div>
+              <div class="call-btn accept">&#x2713;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-row" id="missedStats">
+        <div class="stat-item">
+          <div class="stat-num">62%</div>
+          <div class="stat-label">Of Calls Go Unanswered</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">85%</div>
+          <div class="stat-label">Never Call Back</div>
+        </div>
+      </div>
+    `;
+    await aWait(600);
+    const s = document.getElementById('missedStats');
+    if (s) s.classList.add('visible');
+  }
+
+  else if (idx === 2) {
+    // Scene 3: Grabb responds
+    area.innerHTML = `
+      <div class="scene-header">
+        <div class="scene-step">Step 3</div>
+        <div class="scene-title">Grabb catches it in <span style="color:#8B0000;">under 30 seconds.</span></div>
+        <div class="scene-desc">Our system detects the missed call and texts the customer back on your behalf. Instantly.</div>
+      </div>
+      <div class="phone-container">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-status-bar"><span>14:34</span><span>4G</span></div>
+          <div class="phone-contact">
+            <div class="phone-contact-name">Smith's Plumbing</div>
+            <div class="phone-contact-sub">SMS</div>
+          </div>
+          <div class="sms-area">
+            <div class="sms-time">Missed call &middot; 2:34 PM</div>
+            <div class="grabb-badge">Grabb Auto-Response</div>
+            <div class="sms-bubble sms-outgoing" id="autoSms">Hey! Sorry we missed your call. How can we help you today?</div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-row" id="respondStats">
+        <div class="stat-item">
+          <div class="stat-num">&lt;30s</div>
+          <div class="stat-label">Response Time</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Calls Caught</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Effort From You</div>
+        </div>
+      </div>
+    `;
+    await aWait(500);
+    const sms = document.getElementById('autoSms');
+    if (sms) sms.classList.add('visible');
+    await aWait(600);
+    const st = document.getElementById('respondStats');
+    if (st) st.classList.add('visible');
+  }
+
+  else if (idx === 3) {
+    // Scene 4: AI Conversation
+    area.innerHTML = `
+      <div class="scene-header">
+        <div class="scene-step">Step 4 &mdash; Grabb Pro</div>
+        <div class="scene-title">The customer replies. <span style="color:#8B0000;">Grabb handles it.</span></div>
+        <div class="scene-desc">Our AI continues the conversation, understands what they need, and books them in.</div>
+      </div>
+      <div class="phone-container">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-status-bar"><span>14:35</span><span>4G</span></div>
+          <div class="phone-contact">
+            <div class="phone-contact-name">Smith's Plumbing</div>
+            <div class="phone-contact-sub">SMS</div>
+          </div>
+          <div class="sms-area">
+            <div class="sms-time">Missed call &middot; 2:34 PM</div>
+            <div class="grabb-badge">Grabb Auto-Response</div>
+            <div class="sms-bubble sms-outgoing visible">Hey! Sorry we missed your call. How can we help you today?</div>
+            <div style="height:8px"></div>
+            <div class="sms-bubble sms-incoming" id="c1">Hi, my boiler's making a weird noise and I need someone to look at it</div>
+            <div style="height:8px"></div>
+            <div class="sms-typing" id="t1"><span>.</span><span>.</span><span>.</span></div>
+            <div class="grabb-badge" id="gb2" style="opacity:0">Grabb AI</div>
+            <div class="sms-bubble sms-outgoing" id="c2">No problem! Is this urgent or would you like to book a time that suits you?</div>
+            <div style="height:8px"></div>
+            <div class="sms-bubble sms-incoming" id="c3">Tomorrow morning would be great if possible</div>
+            <div style="height:8px"></div>
+            <div class="sms-typing" id="t2"><span>.</span><span>.</span><span>.</span></div>
+            <div class="grabb-badge" id="gb3" style="opacity:0">Grabb AI</div>
+            <div class="sms-bubble sms-outgoing" id="c4">I've got 9:30 AM or 11:00 AM available tomorrow. Which works best?</div>
+            <div style="height:8px"></div>
+            <div class="sms-bubble sms-incoming" id="c5">9:30 please</div>
+            <div style="height:8px"></div>
+            <div class="sms-typing" id="t3"><span>.</span><span>.</span><span>.</span></div>
+            <div class="grabb-badge" id="gb4" style="opacity:0">Grabb AI</div>
+            <div class="sms-bubble sms-outgoing" id="c6">Done! You're booked in for 9:30 AM tomorrow. You'll receive a confirmation shortly.</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    await aWait(800);
+    const c1 = document.getElementById('c1'); if(c1) c1.classList.add('visible');
+
+    await aWait(1500);
+    const t1 = document.getElementById('t1'); if(t1) t1.classList.add('visible');
+    await aWait(1500);
+    if(t1) t1.style.display='none';
+    const gb2 = document.getElementById('gb2'); if(gb2) gb2.style.opacity='1';
+    await aWait(300);
+    const c2 = document.getElementById('c2'); if(c2) c2.classList.add('visible');
+
+    await aWait(2000);
+    const c3 = document.getElementById('c3'); if(c3) c3.classList.add('visible');
+
+    await aWait(1500);
+    const t2 = document.getElementById('t2'); if(t2) t2.classList.add('visible');
+    await aWait(1500);
+    if(t2) t2.style.display='none';
+    const gb3 = document.getElementById('gb3'); if(gb3) gb3.style.opacity='1';
+    await aWait(300);
+    const c4 = document.getElementById('c4'); if(c4) c4.classList.add('visible');
+
+    await aWait(1800);
+    const c5 = document.getElementById('c5'); if(c5) c5.classList.add('visible');
+
+    await aWait(1500);
+    const t3 = document.getElementById('t3'); if(t3) t3.classList.add('visible');
+    await aWait(1500);
+    if(t3) t3.style.display='none';
+    const gb4 = document.getElementById('gb4'); if(gb4) gb4.style.opacity='1';
+    await aWait(300);
+    const c6 = document.getElementById('c6'); if(c6) c6.classList.add('visible');
+  }
+
+  else if (idx === 4) {
+    // Scene 5: Booked + alerts
+    area.innerHTML = `
+      <div class="scene-header">
+        <div class="scene-step">Step 5</div>
+        <div class="scene-title">You get an alert. <span style="color:#8B0000;">Customer booked.</span></div>
+        <div class="scene-desc">The customer is in your calendar. You get a notification. You didn't lift a finger.</div>
+      </div>
+      <div class="alert-bar" id="a1">
+        <div class="alert-icon">&#x1F4C5;</div>
+        <div class="alert-text">
+          <div class="alert-title">New Booking via Grabb</div>
+          <div class="alert-desc">Tomorrow 9:30 AM &mdash; Boiler inspection &mdash; +44 7700 900123</div>
+        </div>
+      </div>
+      <div class="alert-bar" id="a2">
+        <div class="alert-icon">&#x2709;</div>
+        <div class="alert-text">
+          <div class="alert-title">Email Sent to You</div>
+          <div class="alert-desc">Booking confirmation with customer details and full conversation</div>
+        </div>
+      </div>
+      <div class="alert-bar" id="a3">
+        <div class="alert-icon">&#x2713;</div>
+        <div class="alert-text">
+          <div class="alert-title">Customer Confirmation Sent</div>
+          <div class="alert-desc">"You're booked for 9:30 AM tomorrow. See you then!"</div>
+        </div>
+      </div>
+      <div class="stats-row" id="finalStats">
+        <div class="stat-item">
+          <div class="stat-num">2 min</div>
+          <div class="stat-label">Total Time</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">&pound;300</div>
+          <div class="stat-label">Revenue Saved</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Effort From You</div>
+        </div>
+      </div>
+    `;
+
+    await aWait(600);
+    const a1 = document.getElementById('a1'); if(a1) a1.classList.add('visible');
+    await aWait(800);
+    const a2 = document.getElementById('a2'); if(a2) a2.classList.add('visible');
+    await aWait(800);
+    const a3 = document.getElementById('a3'); if(a3) a3.classList.add('visible');
+    await aWait(600);
+    const fs = document.getElementById('finalStats'); if(fs) fs.classList.add('visible');
+  }
+
+  else if (idx === 5) {
+    // CTA
+    area.innerHTML = '';
+    cta.classList.add('visible');
+  }
+
+  updateNav();
+}
+</script>
+
+</body>
+</html>
